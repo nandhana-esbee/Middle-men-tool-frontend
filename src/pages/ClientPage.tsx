@@ -28,6 +28,7 @@ export default function ClientPage() {
     modules,
     loading: modulesLoading,
     error: modulesError,
+    refresh: refreshModules,
   } = useModules(selectedSessionId);
 
   useEffect(() => {
@@ -39,13 +40,17 @@ export default function ClientPage() {
   }, [modulesError, notify]);
 
   const handleRefresh = async () => {
-    await refresh();
-    notify("Sessions refreshed.", "success");
+    await Promise.all([refresh(), selectedSessionId ? refreshModules() : Promise.resolve()]);
+    notify(selectedSessionId ? "Sessions and modules refreshed." : "Sessions refreshed.", "success");
   };
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "background.default" }}>
-      <ClientAppBar onRefresh={handleRefresh} onSignOut={() => navigate("/")} refreshing={loading} />
+      <ClientAppBar
+        onRefresh={handleRefresh}
+        onSignOut={() => navigate("/")}
+        refreshing={loading || modulesLoading}
+      />
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Grid container spacing={4}>
